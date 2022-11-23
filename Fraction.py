@@ -15,6 +15,13 @@ def convert_to_fraction(variable):
         return variable
     elif type(variable) is int:
         return Fraction(variable)
+    elif type(variable) is float:
+        den = 0
+        num = 0.1
+        while num != int(num):  # подумать над оптимизацией
+            den += 1
+            num = variable * den
+        return Fraction(int(num), den)
     else:
         raise ValueError(f'Unsupported operand type: {type(variable)} for variable {variable}')
 
@@ -22,10 +29,12 @@ def convert_to_fraction(variable):
 class Fraction:
 
     def __init__(self, top: int, bottom=1):
-        self.num = top
-        self.den = bottom
-        if bottom <= 0:
-            raise ValueError('Denominator is equal or less then 0')
+        common = gcd(top, bottom)
+        coef = 1
+        if bottom * top < 0:
+            coef = -1
+        self.num = abs(top) // common * coef
+        self.den = abs(bottom) // common
 
     def __str__(self):
         if self.num == 0:
@@ -40,7 +49,7 @@ class Fraction:
         new_num = self.num * other.den + other.num * self.den
         new_den = self.den * other.den
         common = gcd(new_den, new_num)
-        return Fraction(new_num // common, new_den // common)
+        return Fraction(new_num, new_den)
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -50,21 +59,21 @@ class Fraction:
         new_num = self.num * other.den - other.num * self.den
         new_den = self.den * other.den
         common = gcd(new_den, new_num)
-        return Fraction(new_num // common, new_den // common)
+        return Fraction(new_num, new_den)
 
     def __rsub__(self, other):
         other = convert_to_fraction(other)
         new_num = other.num * self.den - self.num * other.den
         new_den = self.den * other.den
         common = gcd(new_den, new_num)
-        return Fraction(new_num // common, new_den // common)
+        return Fraction(new_num, new_den)
 
     def __mul__(self, other):
         other = convert_to_fraction(other)
         new_num = self.num * other.num
         new_den = self.den * other.den
         common = gcd(new_num, new_den)
-        return Fraction(new_num // common, new_den // common)
+        return Fraction(new_num, new_den)
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -135,6 +144,12 @@ class Fraction:
 
     def __int__(self) -> int:
         return int(self.__round__())
+
+    def get_num(self):
+        return self.num
+
+    def get_den(self):
+        return self.den
 
 
 def main():
